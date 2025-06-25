@@ -76,7 +76,7 @@ python server/mcp_server.py streamable-http
 ```json
 {
   "mcpServers": {
-    "store-mcp-server": {
+    "exhibition-mcp-server": {
       "command": "uv",
       "args": ["run", "mcp", "run", "{workdir}/server/mcp_server.py"],
       "env": {
@@ -98,9 +98,9 @@ python server/mcp_server.py streamable-http
 ```json
 {
   "mcpServers": {
-    "store-mcp-server":{
+    "exhibition-mcp-server":{
       "type": "streamableHttp",
-      "url": "https://mcp.handaas.com/store/store_bigdata?token={token}"  
+      "url": "https://mcp.handaas.com/exhibition/exhibition_bigdata?token={token}"  
       }
   }
 }
