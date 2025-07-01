@@ -79,7 +79,6 @@ def exhibition_bigdata_exhibition_participation(matchKeyword: str, pageIndex: in
 
     返回参数:
     - total: 总数 类型：int
-    - resultList: 列表结果 类型：list of dict
     - fairEndTime: 闭展时间 类型：string
     - fairLogo: 展会logo 类型：string
     - fairDesc: 展会描述 类型：string
@@ -115,7 +114,6 @@ def exhibition_bigdata_fuzzy_search(matchKeyword: str, pageIndex: int = 1) -> di
 
     返回参数:
     - total: 总数 类型：int
-    - resultList: 结果列表 类型：list of dict
     - annualTurnover: 年营业额 类型：string
     - formerNames: 曾用名 类型：list of string
     - address: 注册地址 类型：string
@@ -174,7 +172,6 @@ def exhibition_bigdata_exhibition_venue_search(pavilionRegion: str, matchKeyword
 
     返回参数:
     - total: 总数 类型：int
-    - resultList: 结果列表 类型：list of dict
     - pavilionContact: 联系方式 类型：list of dict - contactType联系方式类型枚举（1：固定电话，2：邮箱，5：传真）
     - pavilionDesc: 会馆简介 类型：string
     - fairCount: 展会数 类型：int
@@ -213,7 +210,6 @@ def exhibition_bigdata_exhibition_search(matchKeyword: str = None, pageIndex: in
     - pageIndex: 页码 类型：int 从1开始
 
     返回参数:
-    - resultList: 列表结果 类型：list of dict
     - _id: 展会id 类型：string
     - fairName: 展会名称 类型：string
     - fairLogo: 展会Logo 类型：string
@@ -254,7 +250,6 @@ def exhibition_bigdata_exhibitor_search(fairRegion: str = None, matchKeyword: st
 
     返回参数:
     - total: 总数 类型：int
-    - resultList: 结果列表 类型：list of dict
     - enterpriseInfo: 企业信息 类型：list of dict
     - operStatus: 企业状态 类型：string
     - enterpriseScale: 公司规模 类型：string

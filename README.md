@@ -123,7 +123,6 @@ python server/mcp_server.py streamable-http
 
 **返回值**:
 - `total`: 总数
-- `resultList`: 结果列表
 
 ### 2. exhibition_bigdata_exhibition_participation
 **功能**: 企业参展记录查询
