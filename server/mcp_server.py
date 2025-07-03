@@ -59,8 +59,12 @@ def call_api(product_id: str, params: dict) -> dict:
     # 调用API
     url = f'https://console.handaas.com/api/v1/integrator/call_api/{INTEGRATOR_ID}'
     try:
-        response = requests.post(url, data=call_params)
-        return response.json().get("data", None) or response.json().get("msgCN", None)
+        response = requests.post(url, data=call_params)        
+        if response.status_code == 200:
+            response_json = response.json()
+            return response_json.get("data", None) or response_json.get("msgCN", None) or response_json
+        else:
+            return f"接口调用失败，状态码：{response.status_code}"
     except Exception as e:
         return "查询失败"
     
