@@ -238,7 +238,7 @@ def exhibition_bigdata_exhibition_search(matchKeyword: str = None, pageIndex: in
 
 @mcp.tool()
 def exhibition_bigdata_exhibitor_search(fairRegion: str = None, matchKeyword: str = None, fairIndustries: str = None,
-                     fairBeginTimes: str = None, fairEndTimes: str = None, pageIndex: int = 1, fairCount: str = None) -> dict:
+                     fairBeginTimes: str = None, fairEndTimes: str = None, pageIndex: int = 1, fairFilter: str = None) -> dict:
     """
     该接口的功能是支持根据输入条件搜索特定参展商的信息，包括企业名关键词、所在地区、展会专题及参展记录范围，返回符合条件的参展商的详细信息，如企业状态、规模、地址、行业等。此接口的使用场景包括展会组织者筛选潜在参展商、市场分析人员进行行业研究、销售人员寻找特定地区或行业的合作企业等，通过细化的搜索条件，可以快速获得目标企业的信息，从而更好地进行商业决策和合作规划。
 
@@ -250,7 +250,7 @@ def exhibition_bigdata_exhibitor_search(fairRegion: str = None, matchKeyword: st
     - fairBeginTimes: 参展开始时间 类型：string - 格式："yyyy-mm-dd"
     - fairEndTimes: 参展结束时间 类型：string - 格式："yyyy-mm-dd"
     - pageIndex: 分页开始位置 类型：int
-    - fairCount: 参展记录 类型：select - 参展记录枚举（5场以下、5-10场、10-20场、20-50场、50-100场、100场以上）
+    - fairFilter: 参展记录 类型：string - 参展记录枚举（5场以下、5-10场、10-20场、20-50场、50-100场、100场以上），注意只能从枚举中选择一个，输入格式举例："5场以下"
 
     返回参数:
     - total: 总数 类型：int
@@ -274,6 +274,9 @@ def exhibition_bigdata_exhibitor_search(fairRegion: str = None, matchKeyword: st
     - nameId: 企业id 类型：string
     - fairIndustries: 展会专题 类型：list of string
     """
+    if fairFilter and fairFilter not in ["5场以下", "5-10场", "10-20场", "20-50场", "50-100场", "100场以上"]:
+        return {"error": "参展记录格式错误, 请输入参展记录枚举, 例如：'5场以下'"}
+    
     # 构建请求参数
     params = {
         'fairRegion': fairRegion,
@@ -282,7 +285,7 @@ def exhibition_bigdata_exhibitor_search(fairRegion: str = None, matchKeyword: st
         'fairBeginTimes': fairBeginTimes,
         'fairEndTimes': fairEndTimes,
         'pageIndex': pageIndex,
-        'fairCount': fairCount
+        'fairCount': fairFilter
     }
 
     # 过滤None值
