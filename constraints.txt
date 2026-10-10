@@ -1,0 +1,5 @@
+# 已验证的 SDK 兼容组合；升级前请运行 tests 中的工具及传输回归测试。
+# MCP 1.19.0 使用 Pydantic 内部 API，不能与 Pydantic 2.14.0 组合。
+mcp==1.19.0
+pydantic==2.12.3
+pydantic-settings==2.11.0

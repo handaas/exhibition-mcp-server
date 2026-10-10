@@ -2,6 +2,7 @@
 import json
 import os
 from hashlib import md5
+from typing import Any
 import requests
 from mcp.server.fastmcp import FastMCP
 from dotenv import load_dotenv
@@ -15,7 +16,7 @@ INTEGRATOR_ID = os.environ.get("INTEGRATOR_ID")
 SECRET_ID = os.environ.get("SECRET_ID")
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
-def call_api(product_id: str, params: dict) -> dict:
+def call_api(product_id: str, params: dict) -> Any:
     """
     调用API接口
     
@@ -24,7 +25,7 @@ def call_api(product_id: str, params: dict) -> dict:
       - params: 接口参数
     
     返回:
-      - 接口返回的JSON数据
+      - 接口返回的JSON数据，或兼容原有工具的错误文本
     """
     if not params:
         params = {}
@@ -59,13 +60,13 @@ def call_api(product_id: str, params: dict) -> dict:
     # 调用API
     url = f'https://console.handaas.com/api/v1/integrator/call_api/{INTEGRATOR_ID}'
     try:
-        response = requests.post(url, data=call_params)        
+        response = requests.post(url, data=call_params, timeout=30)
         if response.status_code == 200:
             response_json = response.json()
             return response_json.get("data", None) or response_json.get("msgCN", None) or response_json
         else:
             return f"接口调用失败，状态码：{response.status_code}"
-    except Exception as e:
+    except Exception:
         return "查询失败"
     
 @mcp.tool()
@@ -237,6 +238,40 @@ def exhibition_bigdata_exhibition_search(matchKeyword: str = None, pageIndex: in
 
 
 @mcp.tool()
+def exhibition_bigdata_exhibition_exhibitors(matchKeyword: str, pageIndex: int = 1, pageSize: int = 50) -> dict:
+    """
+    根据展会ID分页查询参展企业。先用exhibition_bigdata_exhibition_search获取展会的_id，
+    再将该ID作为matchKeyword传入；不要传展会名称或企业ID。
+
+    请求参数:
+    - matchKeyword: 展会ID 类型：string，必填
+    - pageIndex: 页码 类型：int，从1开始，默认1
+    - pageSize: 分页大小 类型：int，范围1-50，默认50
+
+    返回参数:
+    - total: 参展企业总数 类型：int
+    - resultList: 当前页参展企业 类型：list of dict
+    - resultList.name: 企业名称 类型：string
+    - resultList.nameId: 企业ID 类型：string
+    - error: 参数或接口调用失败时的错误信息 类型：string
+    """
+    if not isinstance(matchKeyword, str) or not matchKeyword.strip():
+        return {"error": "展会ID必须为非空字符串，请先通过展会搜索获取_id"}
+    if isinstance(pageIndex, bool) or not isinstance(pageIndex, int) or pageIndex < 1:
+        return {"error": "pageIndex必须为从1开始的整数页码"}
+    if isinstance(pageSize, bool) or not isinstance(pageSize, int) or not 1 <= pageSize <= 50:
+        return {"error": "pageSize必须为1到50之间的整数"}
+
+    params = {
+        'matchKeyword': matchKeyword.strip(),
+        'pageIndex': pageIndex,
+        'pageSize': pageSize,
+    }
+    result = call_api('66a2684651cde0f1e3aeff5a', params)
+    return {"error": result} if isinstance(result, str) else result
+
+
+@mcp.tool()
 def exhibition_bigdata_exhibitor_search(fairRegion: str = None, matchKeyword: str = None, fairIndustries: str = None,
                      fairBeginTimes: str = None, fairEndTimes: str = None, pageIndex: int = 1, fairFilter: str = None) -> dict:
     """
@@ -296,24 +331,23 @@ def exhibition_bigdata_exhibitor_search(fairRegion: str = None, matchKeyword: st
 
 
 if __name__ == "__main__":
-    print("正在启动MCP服务...")
+    print("正在启动MCP服务...", file=sys.stderr)
     # 解析第一个参数
     if len(sys.argv) > 1:
         start_type = sys.argv[1]
     else:
         start_type = "stdio"
 
-    print(f"启动方式: {start_type}")
+    print(f"启动方式: {start_type}", file=sys.stderr)
     if start_type == "stdio":
-        print("正在使用stdio方式启动MCP服务器...")
+        print("正在使用stdio方式启动MCP服务器...", file=sys.stderr)
         mcp.run(transport="stdio")
-    if start_type == "sse":
-        print("正在使用sse方式启动MCP服务器...")
+    elif start_type == "sse":
+        print("正在使用sse方式启动MCP服务器...", file=sys.stderr)
         mcp.run(transport="sse")
     elif start_type == "streamable-http":
-        print("正在使用streamable-http方式启动MCP服务器...")
+        print("正在使用streamable-http方式启动MCP服务器...", file=sys.stderr)
         mcp.run(transport="streamable-http")
     else:
-        print("请输入正确的启动方式: stdio 或 sse 或 streamable-http")
-        exit(1)
-    
+        print("请输入正确的启动方式: stdio 或 sse 或 streamable-http", file=sys.stderr)
+        sys.exit(1)
