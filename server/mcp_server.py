@@ -10,7 +10,7 @@ import sys
 
 load_dotenv()
 
-mcp = FastMCP("展会大数据", instructions="展会大数据", dependencies=["python-dotenv", "requests"])
+mcp = FastMCP("展会行业情报", instructions="展会行业情报", dependencies=["python-dotenv", "requests"])
 
 INTEGRATOR_ID = os.environ.get("INTEGRATOR_ID")
 SECRET_ID = os.environ.get("SECRET_ID")
@@ -156,7 +156,8 @@ def exhibition_bigdata_fuzzy_search(matchKeyword: str, pageIndex: int = 1, pageS
     # 构建请求参数
     params = {
         'matchKeyword': matchKeyword,
-        'pageIndex': pageIndex
+        'pageIndex': pageIndex,
+        'pageSize': pageSize,
     }
 
     # 过滤None值

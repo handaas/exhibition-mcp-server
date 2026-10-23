@@ -195,11 +195,11 @@ class ApiTests(unittest.TestCase):
 
 class LegacyToolTests(unittest.TestCase):
     CASES: tuple[tuple[str, dict[str, str], str, dict[str, str | int]], ...] = (
-        ("exhibition_bigdata_fuzzy_search", {"matchKeyword": "test-company"}, "675cea1f0e009a9ea37edaa1", {"matchKeyword": "test-company", "pageIndex": 1}),
+        ("exhibition_bigdata_fuzzy_search", {"matchKeyword": "test-company"}, "675cea1f0e009a9ea37edaa1", {"matchKeyword": "test-company", "pageIndex": 1, "pageSize": 50}),
         ("exhibition_bigdata_exhibition_participation", {"matchKeyword": "test-company"}, "66a26918ff3066996ecc6471", {"matchKeyword": "test-company", "pageIndex": 1, "pageSize": 10}),
-        ("exhibition_bigdata_exhibition_venue_search", {"pavilionRegion": "北京市"}, "66e2d2ca428a1f4cd69c1083", {"pavilionRegion": "北京", "pageIndex": 1}),
-        ("exhibition_bigdata_exhibition_search", {}, "66a0f6ca477cbe5f7605973f", {"pageIndex": 1}),
-        ("exhibition_bigdata_exhibitor_search", {"fairFilter": "5场以下"}, "66d5b7e0537c3f61d646c473", {"fairCount": "5场以下", "pageIndex": 1}),
+        ("exhibition_bigdata_exhibition_venue_search", {"pavilionRegion": "北京市"}, "66e2d2ca428a1f4cd69c1083", {"pavilionRegion": "北京", "pageIndex": 1, "pageSize": 10}),
+        ("exhibition_bigdata_exhibition_search", {}, "66a0f6ca477cbe5f7605973f", {"pageIndex": 1, "pageSize": 50}),
+        ("exhibition_bigdata_exhibitor_search", {"fairFilter": "5场以下"}, "66d5b7e0537c3f61d646c473", {"fairCount": "5场以下", "pageIndex": 1, "pageSize": 10}),
     )
 
     def test_existing_success_params_and_results_are_unchanged(self):
@@ -208,6 +208,20 @@ class LegacyToolTests(unittest.TestCase):
             with self.subTest(tool=name), patch.object(server, "call_api", return_value=expected) as api:
                 self.assertIs(getattr(server, name)(**arguments), expected)
                 api.assert_called_once_with(product_id, params)
+
+    def test_existing_tools_forward_explicit_pagination(self):
+        for name, arguments, product_id, params in self.CASES:
+            with self.subTest(name=name), patch.object(server, "call_api", return_value={}) as api:
+                getattr(server, name)(**{**arguments, "pageIndex": 3, "pageSize": 4})
+                api.assert_called_once_with(product_id, {**params, "pageIndex": 3, "pageSize": 4})
+
+    def test_pagination_schema_defaults_match_forwarded_requests(self):
+        tools = {tool.name: tool for tool in asyncio.run(server.mcp.list_tools())}
+        for name, _, _, params in self.CASES:
+            with self.subTest(name=name):
+                properties = tools[name].inputSchema["properties"]
+                self.assertEqual(properties["pageIndex"]["default"], params["pageIndex"])
+                self.assertEqual(properties["pageSize"]["default"], params["pageSize"])
 
     def test_existing_error_text_is_unchanged_over_mcp(self):
         for name, arguments, _, _ in self.CASES:
